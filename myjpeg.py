@@ -14,16 +14,6 @@ normArr = np.array([[16, 11, 10, 16,  24,  40,  51,  61],
                     [72, 92, 95, 98, 112, 100, 103,  99]])
 
 np.set_printoptions(suppress=True)
-exBlock = np.array([[139,144,149,153,155,155,155,155],
-                    [144,151,153,156,159,156,156,156],
-                    [150,155,160,163,158,156,156,156],
-                    [159,161,162,160,160,159,159,159],
-                    [159,160,161,162,162,155,155,155],
-                    [161,161,161,161,160,157,157,157],
-                    [162,162,161,163,162,157,157,157],
-                    [162,162,161,161,163,158,158,158]])
-
-
 
 def quantizedDct(img, img_w, img_l):
 
@@ -51,10 +41,6 @@ def quantizedDct(img, img_w, img_l):
     #     imgFreqQuantBlocks[i, j] = np.array(np.round(imgFreqBlocks[i, j] / normArr), dtype=np.int8)
     # # print(imgFreqQuantBlocks[0,0])
     return imgFreqQuantBlocks.astype(np.int16)
-
-# Lossless compressionn happens here
-# thankfully the array elements are 8-bit ints, so creating coefficient arrays should be less complex
-# just go ahead and assume this is okay...
 
 '''
 zigzag algorithm
@@ -128,15 +114,7 @@ def decodeQDct(imgFreqQuantBlocks, img_w, img_l):
     return imgRcnstd
 
 if __name__ == "__main__":
-    exBlock = np.array([[139,144,149,153,155,155,155,155],
-                        [144,151,153,156,159,156,156,156],
-                        [150,155,160,163,158,156,156,156],
-                        [159,161,162,160,160,159,159,159],
-                        [159,160,161,162,162,155,155,155],
-                        [161,161,161,161,160,157,157,157],
-                        [162,162,161,163,162,157,157,157],
-                        [162,162,161,161,163,158,158,158]])
-
+  
     with open('peppers.bin', 'rb') as file:
         imBytes = file.read()
     imArr = np.array([i for i in imBytes], dtype=np.uint8)
@@ -174,13 +152,13 @@ if __name__ == "__main__":
     acZigHuffmaned = acZigObj.compress(acs.tobytes()) + acZigObj.flush()
     print(f"''FULL'' IMPLEMENTATION:\noriginal size={len(imArr)}, arrays sizes=arrays sizes={len(dcDiffHuffmaned)} + {len(acZigHuffmaned)} = {len(acZigHuffmaned)+len(dcDiffHuffmaned)}\n")
 
-
+    # Reconstruct Image
     imgRcnstd = decodeQDct(acDcReconstruction(dc, acs, badAcOrder=False), 256, 256)
     imgRcnstd = np.clip(imgRcnstd,0,255)
     print("average error:", np.sum(np.abs(img-imgRcnstd)) / (256*256))
 
     
-
+    # Display reconstructed image
     plt.subplot(1, 2, 1)
     plt.axis('off')
     plt.imshow(imgRcnstd, cmap='gray')
